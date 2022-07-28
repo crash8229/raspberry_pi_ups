@@ -37,16 +37,16 @@ class Powerpi:
     BAT_CAPACITY, CURRENT_DRAW and VBAT_MAX are used to estimated the state of charge 
     of the battery since there is not current sensor on this UPS. These values along
     with the battery voltage is used to derive the state of charge of the battery.
-    
+_    
     To make the charge percent of the battery shown more accurate, take a note of
     the battery voltage when charging is complete (red LED turns off after plugging in) 
     and edit the VBAT_MAX to that value.
     
     NB:Changing these values does not affect or change the behavior of the UPS.
     """
-    BAT_CAPACITY = 2900 #Battery capacity in mAh
-    CURRENT_DRAW = 2000 #Current draw in mAh approximately
-    VBAT_MAX = 4.208 #This should be the battery when charged to a 100%
+    BAT_CAPACITY = 3500 #Battery capacity in mAh
+    CURRENT_DRAW = 370 #Current draw in mAh approximately
+    VBAT_MAX = 4.17 #This should be the battery when charged to a 100%
 
     ##################################################################################
 
