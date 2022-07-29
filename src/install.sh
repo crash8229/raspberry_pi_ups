@@ -16,8 +16,12 @@ then
     exit 1
 fi
 
+echo "Creating log folder"
+sudo mkdir -p /var/log/ups
+
 _dir="${1:-${PWD}}"
-_user="${USER}"
+#_user="${USER}"
+_user="root"
 _service="
 [Unit]
 Description=UPS Service
@@ -26,7 +30,7 @@ After=multi-user.target
 [Service]
 Type=idle
 User=${_user}
-ExecStart=/usr/bin/python ${_dir}/ups.py
+ExecStart=/usr/bin/python3 ${_dir}/ups.py
 Restart=on-failure
 
 [Install]
