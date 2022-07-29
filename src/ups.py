@@ -5,7 +5,6 @@ import os, sys
 import logging
 import socket
 import json
-import signal
 from powerpi import Powerpi
 
 import datetime
