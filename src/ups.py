@@ -30,6 +30,7 @@ startTime = datetime.datetime.utcnow()
 endTime = startTime
 
 def send_message(msg):
+    global ENABLE_MESSAGES
     os.system(msg) if ENABLE_MESSAGES else None
 
 def print_time_delta():
@@ -75,7 +76,7 @@ def read_status(clear_fault=False):
         
         logging.debug(status)
         
-        if(status['BatteryVoltage'] < ppi.VBAT_LOW):
+        if status['BatteryVoltage'] < ppi.VBAT_LOW:
                 ppi.bat_disconnect()
                 send_message("echo UPS depleted, shutting down | wall -n")
                 endTime = datetime.datetime.utcnow()
