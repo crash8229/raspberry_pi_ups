@@ -4,9 +4,10 @@ import datetime
 import json
 import logging
 import os
-import socket
+import socketserver
 import sys
 import time
+from threading import Thread
 
 from powerpi import Powerpi
 
@@ -41,15 +42,22 @@ except:
     logging.error("Error importing GPIO library, UPS will work without interrupt")
 
 ENABLE_MESSAGES = False
-ENABLE_UDP = True
-UDP_PORT = 40001
-serverAddressPort = ("127.0.0.1", UDP_PORT)
-UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+ENABLE_TCP = True
+serverAddressPort = ("127.0.0.1", 40001)
 disconnect_flag = False
+latest_status = ""
 ppi = Powerpi()
 
 startTime = datetime.datetime.utcnow()
 endTime = startTime
+
+
+class UPSHandler(socketserver.StreamRequestHandler):
+    def handle(self) -> None:
+        cmd = self.rfile.readline().strip().decode("utf-8")
+        logging.debug(cmd)
+        if cmd == "status":
+            self.wfile.write((latest_status + "\n").encode("utf-8"))
 
 
 def multiline_log(msg, level):
@@ -72,7 +80,7 @@ def print_ups_active_time():
 
 
 def read_status(clear_fault=False):
-    global disconnect_flag, ENABLE_UDP
+    global disconnect_flag, latest_status
     global startTime, endTime
     err, status = ppi.read_status(clear_fault)
 
@@ -93,14 +101,7 @@ def read_status(clear_fault=False):
         endTime = datetime.datetime.utcnow()
         print_ups_active_time()
 
-    if ENABLE_UDP:
-        try:
-            UDPClientSocket.sendto(
-                json.dumps(status, indent=4, sort_keys=True).encode("utf-8"),
-                serverAddressPort,
-            )
-        except Exception as ex:
-            logging.error(ex)
+    latest_status = json.dumps(status, indent=4, sort_keys=True)
 
     logging.debug(status)
 
@@ -115,6 +116,11 @@ def read_status(clear_fault=False):
 
 def interrupt_handler(channel):
     read_status(True)
+
+
+def read_status_loop() -> None:
+    while True:
+        read_status()
 
 
 def main():
@@ -134,8 +140,14 @@ def main():
             )
 
     try:
-        while True:
-            read_status()
+        if ENABLE_TCP:
+            update_thread = Thread(target=read_status_loop, name="Read status loop")
+            update_thread.setDaemon(True)
+            update_thread.start()
+            with socketserver.TCPServer(serverAddressPort, UPSHandler) as server:
+                server.serve_forever()
+        else:
+            read_status_loop()
     except KeyboardInterrupt:
         pass
 
