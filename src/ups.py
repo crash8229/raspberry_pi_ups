@@ -141,6 +141,7 @@ def main():
 
     try:
         if ENABLE_TCP:
+            logging.info(f"Starting TCP server: {serverAddressPort[0]}:{serverAddressPort[1]}")
             update_thread = Thread(target=read_status_loop, name="Read status loop")
             update_thread.setDaemon(True)
             update_thread.start()
