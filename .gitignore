@@ -135,3 +135,6 @@ dmypy.json
 =======
 /.vs
 >>>>>>> 9b649e3487e2e2e398a0459c583209f845195f20
+
+# JetBrains
+.idea/
